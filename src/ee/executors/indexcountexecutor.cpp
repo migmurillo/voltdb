@@ -195,7 +195,7 @@ bool IndexCountExecutor::p_execute(const NValueArray &params)
 
                 // re-throw if not an overflow or underflow
                 // currently, it's expected to always be an overflow or underflow
-                if ((e.getInternalFlags() & (SQLException::TYPE_OVERFLOW | SQLException::TYPE_UNDERFLOW)) == 0) {
+                if ((e.getInternalFlags() & (SQLException::TYPE_OVERFLOW | SQLException::TYPE_UNDERFLOW | SQLException::TYPE_VAR_LENGTH_MISMATCH)) == 0) {
                     throw e;
                 }
 
@@ -205,7 +205,8 @@ bool IndexCountExecutor::p_execute(const NValueArray &params)
 
                 if ((localLookupType != INDEX_LOOKUP_TYPE_EQ) &&
                     (ctr == (activeNumOfSearchKeys - 1))) {
-                    assert (localLookupType == INDEX_LOOKUP_TYPE_GT || localLookupType == INDEX_LOOKUP_TYPE_GTE);
+                    assert (localLookupType == INDEX_LOOKUP_TYPE_GT
+                            || localLookupType == INDEX_LOOKUP_TYPE_GTE);
 
                     if (e.getInternalFlags() & SQLException::TYPE_OVERFLOW) {
                         earlyReturnForSearchKeyOutOfRange = true;
@@ -214,7 +215,8 @@ bool IndexCountExecutor::p_execute(const NValueArray &params)
                         searchKeyUnderflow = true;
                         break;
                     } else {
-                        throw e;
+                        assert(e.getInternalFlags() & SQLException::TYPE_VAR_LENGTH_MISMATCH);
+                        // Shorten the key and change the operator if necessary
                     }
                 }
                 // if a EQ comparision is out of range, then return no tuples

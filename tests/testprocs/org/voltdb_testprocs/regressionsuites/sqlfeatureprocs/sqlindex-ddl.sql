@@ -60,7 +60,7 @@ CREATE TABLE TM1 (
 );
 partition table TM1 on column ID;
 create index idx_M1_TREE on TM1 (POINTS);
-    
+
 CREATE TABLE TM2 (
        ID INTEGER NOT NULL ASSUMEUNIQUE,
        POINTS INTEGER,
@@ -130,3 +130,14 @@ create index idx6_TMIN_TREE on TMIN (ABS(A),B);
 
 CREATE TABLE T_ENG_11096 (a int, b int, c int, d int);
 CREATE INDEX IDX_ENG_11096 ON T_ENG_11096(a, b, c);
+
+CREATE TABLE T_ENG_12642 (
+       pk integer primary key,
+       vc1 varchar(4 bytes),
+       vc2 varchar(4 bytes),
+       vb1 varbinary(4),
+       vb2 varbinary(4)
+);
+
+create index t_eng_12642_vc on t_eng_12642(vc1, vc2);
+create index t_eng_12642_vb on t_eng_12642(vb1, vb2);
