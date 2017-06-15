@@ -1,0 +1,4 @@
+**/*.class
+procedures/volttable_segv/BusinessLogic*.java
+procedures/volttable_segv/CommonProc.java
+numbers.txt
