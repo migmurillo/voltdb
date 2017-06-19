@@ -32,43 +32,81 @@ public interface ProducerDRGateway {
         public void notifyOfResponse(boolean success, boolean shouldRetry, String failureCause);
     }
 
-    static class MeshMemberInfo {
-        public MeshMemberInfo(byte clusterId, long creationTime, int partitionCount,
-                int protocolVersion, List<HostAndPort> nodes) {
+    static class ClusterIdentity {
+        private final byte m_clusterId;
+        private final long m_clusterCreationId;
+
+        public ClusterIdentity(byte clusterId, long clusterCreationId) {
             m_clusterId = clusterId;
-            m_creationTime = creationTime;
+            m_clusterCreationId = clusterCreationId;
+        }
+
+        public byte getClusterId() {
+            return m_clusterId;
+        }
+
+        public long getClusterCreationId() {
+            return m_clusterCreationId;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 31 * hash + Byte.hashCode(m_clusterId);
+            hash = 31 * hash + Long.hashCode(m_clusterCreationId);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof ClusterIdentity)) {
+                return false;
+            }
+            ClusterIdentity that = (ClusterIdentity) obj;
+            return that.m_clusterId == m_clusterId &&
+                   that.m_clusterCreationId == m_clusterCreationId;
+        }
+
+        @Override
+        public String toString() {
+            return m_clusterId + "/" + m_clusterCreationId;
+        }
+    }
+
+    static class MeshMemberInfo {
+        public MeshMemberInfo(ClusterIdentity clusterIdentity, int partitionCount,
+                int protocolVersion, List<HostAndPort> nodes) {
+            m_clusterIdentity = clusterIdentity;
             m_partitionCount = partitionCount;
             m_protocolVersion = protocolVersion;
             m_nodes = nodes;
         }
 
-        public MeshMemberInfo(byte clusterId,  long creationTime, List<HostAndPort> nodes) {
-            this(clusterId, creationTime, 0, 0, nodes);
+        public MeshMemberInfo(ClusterIdentity clusterIdentity, List<HostAndPort> nodes) {
+            this(clusterIdentity, 0, 0, nodes);
         }
 
         public MeshMemberInfo(MeshMemberInfo staleNodeInfo, List<HostAndPort> nodes) {
-            m_clusterId = staleNodeInfo.m_clusterId;
-            m_creationTime = staleNodeInfo.m_creationTime;
+            m_clusterIdentity = staleNodeInfo.m_clusterIdentity;
             m_protocolVersion = staleNodeInfo.m_protocolVersion;
             m_partitionCount = staleNodeInfo.m_partitionCount;
             m_nodes = nodes;
         }
 
-        public static MeshMemberInfo createFromHostStrings(byte clusterId, long creationTime, int partitionCount,
+        public static MeshMemberInfo createFromHostStrings(ClusterIdentity clusterIdentity, int partitionCount,
                 int protocolVersion, List<String> nodes) {
             List<HostAndPort> hostAndPorts = new ArrayList<>(nodes.size());
             for (String hostPortString : nodes) {
                 hostAndPorts.add(HostAndPort.fromString(hostPortString));
             }
-            return new MeshMemberInfo(clusterId, creationTime, partitionCount, protocolVersion, hostAndPorts);
+            return new MeshMemberInfo(clusterIdentity, partitionCount, protocolVersion, hostAndPorts);
         }
 
-        public int getClusterId() { return (int)m_clusterId; }
-        public final byte m_clusterId;
-        /**
-         *  This is the persistent cluster create time. NOT THE CLUSTER RECOVERY TIME.
-         */
-        public final long m_creationTime;
+        public ClusterIdentity getClusterIdentity() { return m_clusterIdentity; }
+        public final ClusterIdentity m_clusterIdentity;
         /**
          * ProtocolVersion may or may not be valid depending on who generates this object
          */
@@ -106,7 +144,7 @@ public interface ProducerDRGateway {
      * will be assigned in Pair.first. If Pair.first is -1, it means that this cluster was the
      * original leader and the data on this cluster was not derived from a sync snapshot
      */
-    public Pair<Byte, List<MeshMemberInfo>> getInitialConversations();
+    public Pair<ClusterIdentity, List<MeshMemberInfo>> getInitialConversations();
 
     /**
      * Start listening on the ports
@@ -133,7 +171,7 @@ public interface ProducerDRGateway {
 
     public abstract void updateCatalog(final CatalogContext catalog, final int listenPort);
 
-    public abstract byte getDRClusterId();
+    public abstract ClusterIdentity getDRClusterIdentity();
 
     public void cacheSnapshotRestoreTruncationPoint(Map<Integer, Long> sequenceNumbers);
 
