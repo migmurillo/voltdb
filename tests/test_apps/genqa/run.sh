@@ -52,6 +52,45 @@ function clean() {
     rm -f $VOLTDB_LIB/extension/customexport.jar
 }
 
+# compile the source code for procedures and the client
+function srccompile() {
+    ant -f build.xml
+    mkdir -p obj
+    javac -classpath $CLASSPATH -d obj \
+        src/$APPNAME/*.java \
+        src/$APPNAME/procedures/*.java
+    javac -classpath $CLASSPATH -d obj \
+        src/$APPNAME2/procedures/*.java
+    javac -classpath $CLASSPATH -d obj \
+        src/customexport/*.java
+
+    # stop if compilation fails
+    if [ $? != 0 ]; then exit; fi
+}
+
+# build an application catalog
+function catalog() {
+    srccompile
+    #cmd="$VOLTDB compile --classpath obj -o $APPNAME_EXPORT.jar ddl-nocat.sql"
+    #echo $cmd; $cmd
+    cmd="$VOLTDB legacycompile --classpath obj -o $APPNAME.jar ddl.sql"
+    echo $cmd; $cmd
+    cmd="$VOLTDB legacycompile --classpath obj -o $APPNAME2.jar ddl2.sql"
+    echo $cmd; $cmd
+    cmd="$VOLTDB legacycompile --classpath obj -o $APPNAME3.jar ddl3.sql"
+    echo $cmd; $cmd
+    cmd="$VOLTDB legacycompile --classpath obj -o $APPNAME4.jar ddl4.sql"
+    echo $cmd; $cmd
+    #jar cvf sp.jar obj/*
+
+    # stop if compilation fails
+    rm -rf $EXPORTDATA
+    mkdir $EXPORTDATA
+    rm -fR $CLIENTLOG
+    mkdir $CLIENTLOG
+    if [ $? != 0 ]; then exit; fi
+}
+
 function wait-for-create() {
     let status=1
     while [[ $status != 0  ]]; do
