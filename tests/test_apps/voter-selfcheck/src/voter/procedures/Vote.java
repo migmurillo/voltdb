@@ -37,9 +37,6 @@ import org.voltdb.VoltTable;
 import org.voltdb.VoltType;
 import org.voltdb.VoltTable.ColumnInfo;
 
-@ProcInfo (
-    singlePartition = true
-)
 public class Vote extends VoltProcedure {
 
     // potential return codes
