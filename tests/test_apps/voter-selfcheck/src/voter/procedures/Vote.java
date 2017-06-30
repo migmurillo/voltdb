@@ -38,7 +38,6 @@ import org.voltdb.VoltType;
 import org.voltdb.VoltTable.ColumnInfo;
 
 @ProcInfo (
-    partitionInfo = "votes.phone_number:0",
     singlePartition = true
 )
 public class Vote extends VoltProcedure {
