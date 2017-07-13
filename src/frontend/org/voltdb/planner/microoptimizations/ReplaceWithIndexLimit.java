@@ -56,7 +56,7 @@ public class ReplaceWithIndexLimit extends MicroOptimization {
         }
         sb.append(node.toJSONString() + "\n");
         if (node.getChildCount() > 0) {
-            recursivelyPrint(node.getChild(0), sb， indent++);
+            recursivelyPrint(node.getChild(0), sb, indent++);
         }
     }
 
