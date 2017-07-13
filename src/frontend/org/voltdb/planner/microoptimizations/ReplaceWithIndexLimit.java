@@ -45,16 +45,18 @@ import org.voltdb.utils.CatalogUtil;
 public class ReplaceWithIndexLimit extends MicroOptimization {
 
     // for debug purpose only, this might not be called
-    int indent = 0;
-    protected void recursivelyPrint(AbstractPlanNode node, StringBuilder sb)
+    protected void recursivelyPrint(AbstractPlanNode node, StringBuilder sb) {
+        recursivelyPrint(node, sb, 0);
+    }
+
+    private void recursivelyPrint(AbstractPlanNode node, StringBuilder sb, int indent)
     {
         for (int i = 0; i < indent; i++) {
             sb.append("\t");
         }
         sb.append(node.toJSONString() + "\n");
-        indent++;
         if (node.getChildCount() > 0) {
-            recursivelyPrint(node.getChild(0), sb);
+            recursivelyPrint(node.getChild(0), sb， indent++);
         }
     }
 
