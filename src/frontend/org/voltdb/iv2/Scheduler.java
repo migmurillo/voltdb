@@ -157,7 +157,7 @@ abstract public class Scheduler implements InitiatorMessageHandler
     }
 
     public void setQueueDepthTracker(QueueDepthTracker tracker) {
-        m_tasks.setQueueDepthTracker(tracker);
+        //m_tasks.setQueueDepthTracker(tracker);
     }
 
     public void setLock(Object o) {
